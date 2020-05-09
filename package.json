@@ -1,0 +1,28 @@
+{
+  "name": "rmeme",
+  "version": "0.0.1",
+  "description": "A REST Api for sending and receiving memes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dabass2/rmeme-api.git"
+  },
+  "keywords": [
+    "meme",
+    "RESTful",
+    "api"
+  ],
+  "author": "Daniel Bass",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dabass2/rmeme-api/issues"
+  },
+  "homepage": "https://github.com/dabass2/rmeme-api#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "multer": "^1.4.2"
+  }
+}
