@@ -73,20 +73,25 @@ app.get('/rmeme/memes/total', (req, res) => {
 ////////////// put requests ////////////////
 app.put('/rmeme/:id/up', (req, res) => {
     try {
-        id = req.params.id
-        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        var file = images.images[id]
-        // console.log(file)
-        file.score += 1
-        fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-        if (file.format === 'JPEG') { var format = 'jpg' }
-        res.status(200).json({
-            id: id,
-            name: file.name,
-            url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
-            format: file.format,
-            score: file.score
-        })  
+        var id = req.params.id
+        var votes = Number(req.body.votes)
+        if (!votes) {
+            console.log(votes)
+            res.status(500).send(`Error with votes argument.`)
+        } else {
+            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+            var file = images.images[id]
+            file.score += votes
+            fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+            if (file.format === 'JPEG') { var format = 'jpg' }
+            res.status(200).json({
+                id: id,
+                name: file.name,
+                url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
+                format: file.format,
+                score: file.score
+            })  
+        }
     } catch(e) {
         console.log(e)
         res.status(500).send(`Error when upvoting meme ${req.params.id}`)
@@ -95,19 +100,25 @@ app.put('/rmeme/:id/up', (req, res) => {
 
 app.put('/rmeme/:id/down', (req, res) => {
     try {
-        id = req.params.id
-        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        var file = images.images[id]
-        file.score -= 1
-        fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-        if (file.format === 'JPEG') { var format = 'jpg' }
-        res.status(200).json({
-            id: id,
-            name: file.name,
-            url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
-            format: file.format,
-            score: file.score
-        })  
+        var id = req.params.id
+        var votes = Number(req.body.votes)
+        if (!votes) {
+            console.log(votes)
+            res.status(500).send(`Error with votes argument.`)
+        } else {
+            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+            var file = images.images[id]
+            file.score -= votes
+            fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+            if (file.format === 'JPEG') { var format = 'jpg' }
+            res.status(200).json({
+                id: id,
+                name: file.name,
+                url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
+                format: file.format,
+                score: file.score
+            })  
+        }
     } catch(e) {
         console.log(e)
         res.status(500).send(`Error when downvoting meme ${req.params.id}`)
