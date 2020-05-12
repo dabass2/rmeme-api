@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
-const fs = require('fs');
-const multer = require('multer')
+const fs = require('fs')
+const download = require('image-downloader')
+const bodyParser = require('body-parser')
+const spawn = require("child_process").spawn;
 
 app.use( express.json() )
-app.use( multer().any() )
+app.use( bodyParser.urlencoded({extended: false}) )
+
 
 app.listen(9000, () => {
     console.log('listening on 9000')
@@ -67,7 +70,7 @@ app.get('/rmeme/memes/total', (req, res) => {
 ////////////////////////////////////////////
 
 
-// put requests ////////////////////////////
+////////////// put requests ////////////////
 app.put('/rmeme/:id/up', (req, res) => {
     try {
         id = req.params.id
@@ -114,12 +117,34 @@ app.put('/rmeme/:id/down', (req, res) => {
 
 
 // post requests //////////////////////////
-app.post('/rmeme/:id', (req, res) => {
-    console.log('will create a new meme')
-    // console.log(req.body)
-    // console.log(req.params.id)
-    res.send('200')
-});
+app.post('/rmeme/create', (req, res) => {   // holy SHIT LMFAO
+    var name = ''
+    const options = {
+        url: req.body.url,
+        dest: __dirname + '/images/'
+    }
+    
+    download.image(options).then(({ filename }) => {
+        console.log('Saved to', filename)
+        let python = spawn('python',["./convertImg.py", filename])
+        
+        python.stdout.on('data', (data) => {
+            name = data.toString().trim()
+        })
+
+        python.on('exit', code => {
+            console.log(`Exited with code: ${code}`)
+            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+            var size = images.size.toString()
+            images.images[size] = {"name": name, "format": "JPEG", "score": 100}
+            images.size += 1
+            fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+            res.sendStatus(200)
+        })
+    }).catch((e) => {
+        console.log(e)
+        res.status(500).send('Error when uploading meme.')
+    })});
 //////////////////////////////////////////
 
 
@@ -128,8 +153,8 @@ app.delete('/rmeme/del/:id', (req, res) => {
     res.status(200).send('This is currently under construction.')
     // try {
     //     id = req.params.id
-    //     var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-    //     var size = images.size
+        // var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+        // var size = images.size
     //     if (id == size) {
     //         delete images[id]
     //     } else {

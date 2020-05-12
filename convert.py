@@ -60,17 +60,26 @@ def saveOld(image_list):
             name = (uuid.uuid4().hex)
             i.save("./memes2/{}.jpg".format(name))
 
+def toJpg(image):
+    im=Image.open(image)
+    if im.mode != "RGB":
+        im = im.convert('RGB')
+    name = uuid.uuid4().hex
+    im.save("./{}.jpg".format(name))
+
 def main():
-    image_list = []
+    # image_list = []
+    image = "./expert.jpg"
     '''
     Gather all images in folder with specified ending
     '''
-    for filename in glob.glob('./memes/*.jpg'):
-        im=Image.open(filename)
-        image_list.append(im)
+    # for filename in glob.glob('./memes/*.jpg'):
+    #     im=Image.open(filename)
+    #     image_list.append(im)
 
     # newName(image_list)
     # saveOld(image_list)
     # createJson(image_list)
+    toJpg(image)
 
 main()

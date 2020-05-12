@@ -1,5 +1,7 @@
 node_modules/
 images/
-*.py
+convert.py
 *.html
 images.json
+*.jpg
+*.jpeg
