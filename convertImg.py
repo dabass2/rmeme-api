@@ -10,7 +10,7 @@ def toJpg(image):
     name = uuid.uuid4().hex
     print(name)
     sys.stdout.flush()
-    im.save("./images/{}.jpg".format(name))
+    im.save("./images/memes/{}.jpg".format(name))
 
 def main():
     image = sys.argv[1]

@@ -1,10 +1,10 @@
 const express = require('express')
-const app = express()
 const fs = require('fs')
 const download = require('image-downloader')
 const bodyParser = require('body-parser')
 const spawn = require("child_process").spawn;
 
+const app = express()
 app.use( express.json() )
 app.use( bodyParser.urlencoded({extended: false}) )
 
@@ -117,7 +117,7 @@ app.put('/rmeme/:id/down', (req, res) => {
 
 
 // post requests //////////////////////////
-app.post('/rmeme/create', (req, res) => {   // holy SHIT LMFAO
+app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
     var name = ''
     const options = {
         url: req.body.url,
@@ -138,8 +138,15 @@ app.post('/rmeme/create', (req, res) => {   // holy SHIT LMFAO
             var size = images.size.toString()
             images.images[size] = {"name": name, "format": "JPEG", "score": 100}
             images.size += 1
+            var newId = images.size-1    // fix later lole
             fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-            res.sendStatus(200)
+            res.status(200).json({
+                id: newId,
+                name: name,
+                url: `${url}${name}.jpg`,
+                format: 'JPEG',
+                score: 100
+            })
         })
     }).catch((e) => {
         console.log(e)
@@ -149,24 +156,23 @@ app.post('/rmeme/create', (req, res) => {   // holy SHIT LMFAO
 
 
 // delete requests //////////////////////
-app.delete('/rmeme/del/:id', (req, res) => {
-    res.status(200).send('This is currently under construction.')
-    // try {
-    //     id = req.params.id
-        // var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        // var size = images.size
-    //     if (id == size) {
-    //         delete images[id]
-    //     } else {
-    //         images.images[id] = images.images[size-1]
-    //         delete images.images[size-1]
-    //     }
-    //     images.size -= 1
-    //     fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-    //     res.status(200).send(`Successfully deleted meme ${id}`)  
-    // } catch(e) {
-    //     console.log(e)
-    //     res.status(500).send(`Error when deleting meme ${req.params.id}`)
-    // }
+app.delete('/rmeme/del/:id', (req, res) => {    // lole
+    try {
+        id = req.params.id
+        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+        var size = images.size
+        if (id == size) {
+            delete images[id]
+        } else {
+            images.images[id] = images.images[size-1]
+            delete images.images[size-1]
+        }
+        images.size -= 1
+        fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+        res.status(200).send(`Successfully deleted meme ${id}`)  
+    } catch(e) {
+        console.log(e)
+        res.status(500).send(`Error when deleting meme ${req.params.id}`)
+    }
 });
 ////////////////////////////////////////
