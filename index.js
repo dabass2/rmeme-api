@@ -33,7 +33,7 @@ app.get('/rmeme', (req, res) => {
         });
     } catch(e) {
         console.log(e)
-        res.status(500).send('Error retrieving random meme.')
+        res.status(500).send('Error retrieving random meme.\n')
     }
 
 });
@@ -54,7 +54,7 @@ app.get('/rmeme/:id', (req, res) => {
         });
     } catch(e) {
         console.log(e)
-        res.status(500).send('Invalid meme ID. Retrival error.')
+        res.status(500).send('Invalid meme ID. Retrieval error.\n')
     }
 });
 
@@ -64,7 +64,22 @@ app.get('/rmeme/memes/total', (req, res) => {
         res.status(200).json({total: file.size})
     } catch(e) {
         console.log(e)
-        res.status(500).send('Error when recieving total number of memes.')
+        res.status(500).send('Error when receiving total number of memes.\n')
+    }
+})
+
+app.get('/rmeme/user/:id', (req, res) => {
+    try {
+        var id = req.params.id
+        var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
+        var user = userList[id]
+        res.status(200).json({
+            'id': id,
+            'token': user.token
+        })
+    } catch(e) {
+        console.log(e)
+        res.status(500).send(`Error retrieving user with id: ${req.params.id}\n`)
     }
 })
 ////////////////////////////////////////////
@@ -77,7 +92,7 @@ app.put('/rmeme/:id/up', (req, res) => {
         var votes = Number(req.body.votes)
         if (!votes) {
             console.log(votes)
-            res.status(500).send(`Error with votes argument.`)
+            res.status(500).send(`Error with votes argument.\n`)
         } else {
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var file = images.images[id]
@@ -94,7 +109,7 @@ app.put('/rmeme/:id/up', (req, res) => {
         }
     } catch(e) {
         console.log(e)
-        res.status(500).send(`Error when upvoting meme ${req.params.id}`)
+        res.status(500).send(`Error when upvoting meme ${req.params.id}\n`)
     }
 });
 
@@ -104,7 +119,7 @@ app.put('/rmeme/:id/down', (req, res) => {
         var votes = Number(req.body.votes)
         if (!votes) {
             console.log(votes)
-            res.status(500).send(`Error with votes argument.`)
+            res.status(500).send(`Error with votes argument.\n`)
         } else {
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var file = images.images[id]
@@ -121,7 +136,34 @@ app.put('/rmeme/:id/down', (req, res) => {
         }
     } catch(e) {
         console.log(e)
-        res.status(500).send(`Error when downvoting meme ${req.params.id}`)
+        res.status(500).send(`Error when downvoting meme ${req.params.id}\n`)
+    }
+})
+
+app.put('/rmeme/validate/:id', (req, res) => {
+    try {
+        var id = req.params.id
+        var recToken = req.body.token
+        var recSecret = req.body.secret
+        var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'))
+        var user = userList[id]
+        if (!user) {
+            res.status(500).send(`No user ${id} exists.\n`)
+            return
+        }
+
+        if (recToken === user.token) {
+            if (recSecret === user.secret) {
+                res.status(200).send(true)
+            } else {
+                res.status(200).send(false)
+            }
+        } else {
+            res.status(200).send(false)
+        }
+    } catch(e) {
+        console.log(e)
+        res.status(500).send(`Error validating user with id: ${req.params.id}\n`)
     }
 })
 ///////////////////////////////////////////
@@ -161,8 +203,41 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
         })
     }).catch((e) => {
         console.log(e)
-        res.status(500).send('Error when uploading meme.')
-    })});
+        res.status(500).send('Error when uploading meme.\n')
+    })
+});
+
+app.post('/rmeme/create/user', (req, res) => {
+    try {
+        function createToken() {
+            return (Math.random()*1e16).toString(36) + (Math.random()*1e16).toString(36)
+        }
+
+        function createSecret() {
+            return (Math.random()*1e16).toString(36) + (Math.random()*1e16).toString(36) + (Math.random()*1e16).toString(36) + (Math.random()*1e16).toString(36)
+        }
+
+        var id = req.body.id
+        var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
+        var token = createToken()
+        var secret = createSecret()
+        
+        if (Object.keys(userList).includes(id)) {
+            res.status(500).send("User already exists. Send get request to '/rmeme/user/:id' for user information.\n")
+            return
+        }
+        userList[id] = {"token": token, "secret": secret}
+        fs.writeFileSync('./users.json', JSON.stringify(userList, undefined, 2))
+        res.status(200).json({
+            'id': id,
+            'token': token,
+            'secret': secret
+        })
+    } catch(err) {
+        console.log(err)
+        res.status(500).send("Error creating new user.\n")
+    }
+})
 //////////////////////////////////////////
 
 
@@ -180,10 +255,10 @@ app.delete('/rmeme/del/:id', (req, res) => {    // lole
         }
         images.size -= 1
         fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-        res.status(200).send(`Successfully deleted meme ${id}`)  
+        res.status(200).send(`Successfully deleted meme ${id}\n`)  
     } catch(e) {
         console.log(e)
-        res.status(500).send(`Error when deleting meme ${req.params.id}`)
+        res.status(500).send(`Error when deleting meme ${req.params.id}\n`)
     }
 });
 ////////////////////////////////////////
