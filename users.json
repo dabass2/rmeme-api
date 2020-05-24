@@ -1,10 +1,22 @@
 {
-  "undefined": {
-    "token": "giio589007.r713c0tmnsa.w",
-    "secret": "215nl8pw5q8qzedqksjge.i2j1y9le4lc.uhkl688xk0v.r"
+  "ids": {
+    "leinad@leinad.pw": "2bg2dchr7mi1ecsp4ee3mp",
+    "a.a@leinad.pw": "1rilsjhtt531tqlnxebsmt"
   },
-  "admin": {
-    "token": "2lotktaiwq41fgqmvz8qbr",
-    "secret": "1x9df0ocxwd1q1913d4pfe4j2n7dwk42.mhxuz7gx10c"
+  "tokens": {
+    "2bg2dchr7mi1ecsp4ee3mp": {
+      "id": "leinad@leinad.pw",
+      "numAccesses": 17,
+      "lastAccess": "2020-05-24T16:07:41.556Z",
+      "accessLevel": 3,
+      "maxAccesses": 999
+    },
+    "1rilsjhtt531tqlnxebsmt": {
+      "id": "a.a@leinad.pw",
+      "numAccesses": 4,
+      "lastAccess": "2020-05-24T17:18:35.613Z",
+      "accessLevel": 1,
+      "maxAccesses": 3
+    }
   }
 }
