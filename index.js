@@ -32,18 +32,19 @@ function checkLevel(token, requestType) {
         var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
         var user = userList.tokens[token]
         console.log(user)
+        let now = new Date()
+        let oldDate = new Date(user.lastAccess)
+        if (oldDate.getUTCDay() != now.getUTCDay() && oldDate.getUTCHours() <= now.getUTCHours()) {
+            user.numAccesses = 0
+            user.lastAccess = now
+        }
+
         if (user.accessLevel >= requests[requestType]) {
             if (user.numAccesses > user.maxAccesses) {
                 console.log("Reached max accesses.")
                 return null
             }
 
-            let now = new Date()
-            let oldDate = new Date(user.lastAccess)
-            if (oldDate.getUTCDay() != now.getUTCDay() && oldDate.getUTCHours() <= now.getUTCHours()) {
-                user.numAccesses = 0
-                user.lastAccess = now
-            }
             user.numAccesses += 1
             fs.writeFileSync('./users.json', JSON.stringify(userList, undefined, 2))
             return true
@@ -114,7 +115,7 @@ app.get('/rmeme/user/:token', (req, res) => {
         var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
         var user = userList.tokens[token]
         if (!user) {
-            res.status(200).send(`No user with token ${token} found.\n`)
+            res.status(400).send(`No user with token ${token} found.\n`)
             return
         }
         res.status(200).send(user)
@@ -132,7 +133,7 @@ app.put('/rmeme/:id/up', (req, res) => {
     let check = checkLevel(token, "put")
     if (!check) {
         if (check === null) {
-            res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+            res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
             return
         }
         res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
@@ -145,7 +146,7 @@ app.put('/rmeme/:id/up', (req, res) => {
         if (!votes) {
             console.log(votes)
             decreaseAccess(token)
-            res.status(500).send(`Error with votes argument.\n`)
+            res.status(400).send(`Error with votes argument.\n`)
         } else {
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var file = images.images[id]
@@ -172,7 +173,7 @@ app.put('/rmeme/:id/down', (req, res) => {
     let check = checkLevel(token, "put")
     if (!check) {
         if (check === null) {
-            res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+            res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
             return
         }
         res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
@@ -185,7 +186,7 @@ app.put('/rmeme/:id/down', (req, res) => {
         if (!votes) {
             console.log(votes)
             decreaseAccess(token)
-            res.status(500).send(`Error with votes argument.\n`)
+            res.status(400).send(`Error with votes argument.\n`)
         } else {
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var file = images.images[id]
@@ -215,10 +216,10 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
     let check = checkLevel(token, "post")
     if (!check) {
         if (check === null) {
-            res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+            res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
             return
         }
-        res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
+        res.status(400).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
         return
     }
     
@@ -238,6 +239,12 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
 
         python.on('exit', code => {
             console.log(`Exited with code: ${code}`)
+            if (code !== '0') {
+                decreaseAccess(req.body.token)
+                res.status(500).send('Error when uploading meme.\n')
+                return
+            }
+            
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var size = images.size.toString()
             images.images[size] = {"name": name, "format": "JPEG", "score": 100}
@@ -265,10 +272,10 @@ app.post('/rmeme/user/create', (req, res) => {
         let check = checkLevel(token, "post")
         if (!check) {
             if (check === null) {
-                res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+                res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
                 return
             }
-            res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
+            res.status(400).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
             return
         }
 
@@ -279,13 +286,13 @@ app.post('/rmeme/user/create', (req, res) => {
         let date = new Date()
 
         if (!id.match(emailRegex)) {
-            res.status(500).send(`Invalid email ${id}.\n`)
+            res.status(400).send(`Invalid email ${id}.\n`)
             return
         }
 
         if (Object.keys(userList.ids).includes(id)) {
             decreaseAccess(req.body.token)
-            res.status(500).send("Email already exists. Send get request to '/rmeme/user/:token' for user information.\n")
+            res.status(400).send("Email already exists. Send get request to '/rmeme/user/:token' for user information.\n")
             return
         }
         userList.ids[id] = token
@@ -315,10 +322,10 @@ app.delete('/rmeme/del/:id', (req, res) => {    // lole
         let check = checkLevel(token, "delete")
         if (!check) {
             if (check === null) {
-                res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+                res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
                 return
             }
-            res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
+            res.status(400).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
             return
         }
 
@@ -347,10 +354,10 @@ app.delete('/rmeme/user/del/:id', (req, res) => {
         let check = checkLevel(token, "delete")
         if (!check) {
             if (check === null) {
-                res.status(200).send(`Max daily accesses reached with token ${token}.\n`)
+                res.status(400).send(`Max daily accesses reached with token ${token}.\n`)
                 return
             }
-            res.status(500).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
+            res.status(400).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
             return
         }
 
