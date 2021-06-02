@@ -15,7 +15,7 @@ app.listen(9000, () => {
 
 // Sql stuff here, probably from secret config file
 
-const url = 'http://leinad.pw/rmeme/images/memes/'
+const url = 'http://rmeme.me/images/memes/'
 const requests = {"get": 0, "put": 1, "post": 2, "delete": 3}
 
 function createToken() {
