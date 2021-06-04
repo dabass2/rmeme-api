@@ -363,7 +363,7 @@
     "72": {
       "name": "1000e173a9144d0c887fca6e81b803eb",
       "format": "JPEG",
-      "score": 99
+      "score": 98
     },
     "73": {
       "name": "10061801b8704b86841748d34f63b149",
@@ -3183,7 +3183,7 @@
     "636": {
       "name": "a0c79c945529482fb23e9be20606e206",
       "format": "JPEG",
-      "score": 100
+      "score": 99
     },
     "637": {
       "name": "a0c946d3991149c88c4f7d8748ebe505",
@@ -5398,13 +5398,18 @@
     "1079": {
       "name": "47982819a67248a296be921b52e56727",
       "format": "JPEG",
-      "score": 101
+      "score": 102
     },
     "1080": {
       "name": "5285bc702fe7462bb2de8f5f19184537",
       "format": "JPEG",
       "score": 100
+    },
+    "1081": {
+      "name": "90bbd4452c8f4403afc6c479763bd619",
+      "format": "JPEG",
+      "score": 100
     }
   },
-  "size": 1081
+  "size": 1082
 }

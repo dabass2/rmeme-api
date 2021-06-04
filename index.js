@@ -233,7 +233,7 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
     
     download.image(options).then(({ filename }) => {
         console.log('Saved to', filename)
-        let python = spawn('python',["./convertImg.py", filename])
+        let python = spawn('python3',["./convertImg.py", filename])
         
         python.stdout.on('data', (data) => {
             name = data.toString().trim()
@@ -241,11 +241,13 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
 
         python.on('exit', code => {
             console.log(`Exited with code: ${code}`)
-            if (code !== '0') {
+            if (code !== 0) {
                 decreaseAccess(req.body.token)
+		console.log('Image not converted')
                 res.status(500).send('Error when uploading meme.\n')
                 return
             }
+	    console.log('Image converted')
             
             var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
             var size = images.size.toString()
@@ -253,7 +255,8 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
             images.size += 1
             var newId = images.size-1    // fix later lole
             fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-            res.status(200).json({
+	    console.log(name)
+	    res.status(200).json({
                 id: newId,
                 name: name,
                 url: `${url}${name}.jpg`,
