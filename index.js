@@ -3,6 +3,7 @@ const fs = require('fs')
 const download = require('image-downloader')
 const bodyParser = require('body-parser')
 const spawn = require("child_process").spawn;
+const crypto = require("crypto")
 
 const app = express()
 app.use( express.json() )
@@ -225,44 +226,39 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
         return
     }
     
-    var name = ''
+    let uuid = crypto.randomUUID()
+    let ending = req.body.url.split(".").at(-1)
+    let name = uuid + "." + ending
+    console.log(ending)
+    extensions = ["png", "jpg", "gif", "jpeg", "apng", "mp4", "webm"]
+    if (!extensions.includes(ending)) {
+        console.log("Invalid file ending" + ending)
+        decreaseAccess(req.body.token)
+        res.status(500).send('Invalid file type.\n')
+        return
+    }
+    
     const options = {
         url: req.body.url,
-        dest: __dirname + '/images/'
+        dest: __dirname + `/images/memes/${name}`,
+        extractFilename: false
     }
     
     download.image(options).then(({ filename }) => {
         console.log('Saved to', filename)
-        let python = spawn('python3',["./convertImg.py", filename])
-        
-        python.stdout.on('data', (data) => {
-            name = data.toString().trim()
-        })
-
-        python.on('exit', code => {
-            console.log(`Exited with code: ${code}`)
-            if (code !== 0) {
-                decreaseAccess(req.body.token)
-		console.log('Image not converted')
-                res.status(500).send('Error when uploading meme.\n')
-                return
-            }
-	    console.log('Image converted')
-            
-            var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-            var size = images.size.toString()
-            images.images[size] = {"name": name, "format": "JPEG", "score": 100}
-            images.size += 1
-            var newId = images.size-1    // fix later lole
-            fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
+        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+        var size = images.size.toString()
+        images.images[size] = {"name": uuid, "format": ending, "score": 100}
+        images.size += 1
+        var newId = images.size-1    // fix later lole
+        fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
 	    console.log(name)
 	    res.status(200).json({
-                id: newId,
-                name: name,
-                url: `${url}${name}.jpg`,
-                format: 'JPEG',
-                score: 100
-            })
+            id: newId,
+            name: uuid,
+            url: `${url}${name}`,
+            format: ending,
+            score: 100
         })
     }).catch((e) => {
         console.log(e)
