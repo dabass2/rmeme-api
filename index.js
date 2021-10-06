@@ -240,7 +240,7 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
     
     const options = {
         url: req.body.url,
-        dest: __dirname + `/images/memes/${name}`,
+        dest: `../../rmeme/html/images/memes/${name}`,
         extractFilename: false
     }
     
