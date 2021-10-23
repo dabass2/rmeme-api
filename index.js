@@ -297,7 +297,7 @@ app.post('/rmeme/user/create', (req, res) => {
             return
         }
         userList.ids[id] = token
-        userList.tokens[token] = {"id": id, "numAccesses": 0, "lastAccess": date, "accessLevel": 1, "maxAccesses": 10}
+        userList.tokens[token] = {"id": id, "numAccesses": 0, "lastAccess": date, "accessLevel": 1, "maxAccesses": 0}
         fs.writeFileSync('./users.json', JSON.stringify(userList, undefined, 2))
         res.status(200).json({
             'token': token,
