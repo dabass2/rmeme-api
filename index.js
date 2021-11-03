@@ -16,7 +16,7 @@ app.listen(9000, () => {
 
 // Sql stuff here, probably from secret config file
 
-const url = 'http://rmeme.me/images/memes/'
+const url = 'https://rmeme.me/images/memes/'
 const requests = {"get": 0, "put": 1, "post": 2, "delete": 3}
 
 function createToken() {
@@ -67,11 +67,13 @@ app.get('/rmeme', (req, res) => {
         var num = Math.floor(images.size * Math.random())
         var file = images.images[num]
         // console.log(file)
-        if (file.format === 'JPEG') { var format = 'jpg' }
+	//console.log(file)
+	let format = file.format
+        if (format === 'JPEG') { format = 'jpg' }
         res.status(200).json({
             id: num,
             name: file.name,
-            url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
+            url: `${url}${file.name}.${format}`,
             format: file.format,
             score: file.score
         });
