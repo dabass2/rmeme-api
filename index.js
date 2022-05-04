@@ -243,9 +243,10 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
         return
     }
     
+    let save_dir = ``
     const options = {
         url: req.body.url,
-        dest: `../../rmeme/html/images/memes/${name}`,
+        dest: `../../leinad/html/images/memes/${name}`,
         extractFilename: false
     }
     
