@@ -7,9 +7,11 @@ const crypto = require("crypto")
 const cors = require("cors")
 
 const app = express()
-app.use( cors() )
-app.use( express.json() )
-app.use( bodyParser.urlencoded({extended: false}) )
+app.use(cors())
+app.use(express.json())
+app.use(bodyParser.urlencoded({
+    extended: false
+}))
 
 
 app.listen(9000, () => {
@@ -20,10 +22,15 @@ app.listen(9000, () => {
 
 // const url = 'https://rmeme.me/images/memes/'
 const url = 'https://leinad.dev/images/memes/'
-const requests = {"get": 0, "put": 1, "post": 2, "delete": 3}
+const requests = {
+    "get": 0,
+    "put": 1,
+    "post": 2,
+    "delete": 3
+}
 
 function createToken() {
-    return (Math.random()*1e16).toString(36) + (Math.random()*1e16).toString(36)
+    return (Math.random() * 1e16).toString(36) + (Math.random() * 1e16).toString(36)
 }
 
 function decreaseAccess(token) {
@@ -56,7 +63,7 @@ function checkLevel(token, requestType) {
             return true
         }
         return false
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         return false
     }
@@ -66,42 +73,49 @@ function checkLevel(token, requestType) {
 // get requests //////////////////////////
 app.get('/rmeme', (req, res) => {
     try {
-        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        var num = Math.floor(images.size * Math.random())
-        var file = images.images[num]
-        // console.log(file)
-	//console.log(file)
-	let format = file.format
-        if (format === 'JPEG') { format = 'jpg' }
+        let image_json = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+        let seen_json = JSON.parse(fs.readFileSync('./seen.json', 'utf8'));
+        let num;
+        console.log(seen_json.seen)
+        do {
+            num = Math.floor(image_json.size * Math.random())
+            console.log("number %d is already in seen", num, seen_json.seen.includes(num))
+        } while (seen_json.seen.includes(num))
+        seen_json.seen.push(num)
+        console.log(seen_json.seen.length)
+        if (seen_json.seen.length >= 350) {
+            seen_json.seen.shift()
+        }
+        fs.writeFileSync('./seen.json', JSON.stringify(seen_json, undefined, 0))
+        let file = image_json.images[num]
+        let img_format = (file.format === 'JPEG' ? 'jpg' : file.format.toLowerCase())
         res.status(200).json({
             id: num,
             name: file.name,
-            url: `${url}${file.name}.${format}`,
-            format: file.format,
+            url: `${url}${file.name}.${img_format}`,
+            format: img_format,
             score: file.score
         });
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         res.status(500).send('Error retrieving random meme.\n')
     }
-
 });
 
 app.get('/rmeme/:id', (req, res) => {
     try {
         id = req.params.id
-        var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        var file = images.images[id]
-        // console.log(file)
-        var format = (file.format === 'JPEG' ? 'jpg' : file.format.toLowerCase())
+        let image_json = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
+        let file = image_json.images[id]
+        let img_format = (file.format === 'JPEG' ? 'jpg' : file.format.toLowerCase())
         res.status(200).json({
             id: id,
             name: file.name,
-            url: `${url}${file.name}.${format}`,
-            format: file.format,
+            url: `${url}${file.name}.${img_format}`,
+            format: img_format,
             score: file.score
         });
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         res.status(500).send('Invalid meme ID. Retrieval error.\n')
     }
@@ -110,8 +124,10 @@ app.get('/rmeme/:id', (req, res) => {
 app.get('/rmeme/memes/total', (req, res) => {
     try {
         var file = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
-        res.status(200).json({total: file.size})
-    } catch(e) {
+        res.status(200).json({
+            total: file.size
+        })
+    } catch (e) {
         console.log(e)
         res.status(500).send('Error when receiving total number of memes.\n')
     }
@@ -127,7 +143,7 @@ app.get('/rmeme/user/:token', (req, res) => {
             return
         }
         res.status(200).send(user)
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         res.status(500).send(`Error retrieving token: ${req.params.token}\n`)
     }
@@ -160,16 +176,18 @@ app.put('/rmeme/:id/up', (req, res) => {
             var file = images.images[id]
             file.score += votes
             fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-            if (file.format === 'JPEG') { var format = 'jpg' }
+            if (file.format === 'JPEG') {
+                var format = 'jpg'
+            }
             res.status(200).json({
                 id: id,
                 name: file.name,
                 url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
                 format: file.format,
                 score: file.score
-            })  
+            })
         }
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         decreaseAccess(req.body.token)
         res.status(500).send(`Error when upvoting meme ${req.params.id}\n`)
@@ -200,16 +218,18 @@ app.put('/rmeme/:id/down', (req, res) => {
             var file = images.images[id]
             file.score -= votes
             fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-            if (file.format === 'JPEG') { var format = 'jpg' }
+            if (file.format === 'JPEG') {
+                var format = 'jpg'
+            }
             res.status(200).json({
                 id: id,
                 name: file.name,
                 url: `${url}${file.name}.${format.toLocaleLowerCase()}`,
                 format: file.format,
                 score: file.score
-            })  
+            })
         }
-    } catch(e) {
+    } catch (e) {
         console.log(e)
         decreaseAccess(req.body.token)
         res.status(500).send(`Error when downvoting meme ${req.params.id}\n`)
@@ -219,7 +239,7 @@ app.put('/rmeme/:id/down', (req, res) => {
 
 
 // post requests //////////////////////////
-app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
+app.post('/rmeme/create', (req, res) => { // holy shit LMFAO
     var token = req.body.token
     let check = checkLevel(token, "post")
     if (!check) {
@@ -230,7 +250,7 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
         res.status(400).send(`Invalid user permissions for this request. Recieved token ${token}\n`)
         return
     }
-    
+
     let uuid = crypto.randomUUID()
     let ending = req.body.url.split(".").at(-1)
     let name = uuid + "." + ending
@@ -242,24 +262,30 @@ app.post('/rmeme/create', (req, res) => {   // holy shit LMFAO
         res.status(500).send('Invalid file type.\n')
         return
     }
-    
+
     let save_dir = ``
     const options = {
         url: req.body.url,
         dest: `../../leinad/html/images/memes/${name}`,
         extractFilename: false
     }
-    
-    download.image(options).then(({ filename }) => {
+
+    download.image(options).then(({
+        filename
+    }) => {
         console.log('Saved to', filename)
         var images = JSON.parse(fs.readFileSync('./images.json', 'utf8'));
         var size = images.size.toString()
-        images.images[size] = {"name": uuid, "format": ending, "score": 100}
+        images.images[size] = {
+            "name": uuid,
+            "format": ending,
+            "score": 100
+        }
         images.size += 1
-        var newId = images.size-1    // fix later lole
+        var newId = images.size - 1 // fix later lole
         fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-	    console.log(name)
-	    res.status(200).json({
+        console.log(name)
+        res.status(200).json({
             id: newId,
             name: uuid,
             url: `${url}${name}`,
@@ -303,7 +329,13 @@ app.post('/rmeme/user/create', (req, res) => {
             return
         }
         userList.ids[id] = token
-        userList.tokens[token] = {"id": id, "numAccesses": 0, "lastAccess": date, "accessLevel": 1, "maxAccesses": 0}
+        userList.tokens[token] = {
+            "id": id,
+            "numAccesses": 0,
+            "lastAccess": date,
+            "accessLevel": 1,
+            "maxAccesses": 0
+        }
         fs.writeFileSync('./users.json', JSON.stringify(userList, undefined, 2))
         res.status(200).json({
             'token': token,
@@ -311,9 +343,9 @@ app.post('/rmeme/user/create', (req, res) => {
             'numAccesses': 0,
             'lastAccess': date,
             'accessLevel': 1,
-            'maxAccesses': 10 
+            'maxAccesses': 10
         })
-    } catch(err) {
+    } catch (err) {
         console.log(err)
         decreaseAccess(req.body.token)
         res.status(500).send("Error creating new user.\n")
@@ -323,7 +355,7 @@ app.post('/rmeme/user/create', (req, res) => {
 
 
 // delete requests //////////////////////
-app.delete('/rmeme/del/:id', (req, res) => {    // lole
+app.delete('/rmeme/del/:id', (req, res) => { // lole
     try {
         var token = req.body.token
         let check = checkLevel(token, "delete")
@@ -342,13 +374,13 @@ app.delete('/rmeme/del/:id', (req, res) => {    // lole
         if (id == size) {
             delete images[id]
         } else {
-            images.images[id] = images.images[size-1]
-            delete images.images[size-1]
+            images.images[id] = images.images[size - 1]
+            delete images.images[size - 1]
         }
         images.size -= 1
         fs.writeFileSync('./images.json', JSON.stringify(images, undefined, 2))
-        res.status(200).send(`Successfully deleted meme ${id}\n`)  
-    } catch(e) {
+        res.status(200).send(`Successfully deleted meme ${id}\n`)
+    } catch (e) {
         console.log(e)
         decreaseAccess(req.body.token)
         res.status(500).send(`Error when deleting meme ${req.params.id}\n`)
@@ -373,8 +405,8 @@ app.delete('/rmeme/user/del/:id', (req, res) => {
         delete userList.tokens[usrToken]
         delete userList.ids[req.params.id]
         fs.writeFileSync('./users.json', JSON.stringify(userList, undefined, 2))
-        res.status(200).send(`Successfully deleted user with id ${req.params.id}\n`) 
-    } catch(e) {
+        res.status(200).send(`Successfully deleted user with id ${req.params.id}\n`)
+    } catch (e) {
         console.log(e)
         decreaseAccess(req.body.token)
         res.status(500).send(`Error when deleting user with id ${req.params.id}\n`)
