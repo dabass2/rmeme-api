@@ -44,7 +44,7 @@ function checkLevel(token, requestType) {
     try {
         var userList = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
         var user = userList.tokens[token]
-        console.log(user)
+        // console.log(user)
         let now = new Date()
         let oldDate = new Date(user.lastAccess)
         if (oldDate.getUTCDay() != now.getUTCDay() && oldDate.getUTCHours() <= now.getUTCHours()) {
