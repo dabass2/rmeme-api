@@ -1,8 +1,7 @@
-node_modules/
-images/
-*.html
+node_modules
 images.json
-*.jpg
-*.jpeg
-users.json
-seen.json
+images
+*.py
+temp.js
+*.env
+dist
