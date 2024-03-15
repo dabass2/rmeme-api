@@ -6,7 +6,7 @@ import {
   tagsAll,
 } from "koa-swagger-decorator";
 import { db } from "..";
-import { sql } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 import { memes } from "../db/schema/memes";
 
 @responsesAll({
@@ -26,9 +26,10 @@ export class RmemeService {
       .orderBy(sql`RAND()`)
       .limit(1);
 
-    if (result || !result[0]) {
+    if (!result || !result[0]) {
       ctx.status = 500;
       ctx.body = { message: "Failed to get random meme" };
+      return;
     }
 
     ctx.status = 200;
@@ -36,5 +37,20 @@ export class RmemeService {
       ...result[0],
       url: `${process.env.HOSTED_FILE_BASE_PATH}/${result[0].filename}.${result[0].extension}`,
     };
+  }
+
+  @request("get", "/total")
+  @summary("Get total amount of memes")
+  static async getTotalMemes(ctx: Context) {
+    const response = await db.select({ value: count() }).from(memes);
+
+    if (!response || !response.length) {
+      ctx.status = 500;
+      ctx.body = { message: "Failed to get total number of memes" };
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = { total: response[0].value };
   }
 }

@@ -6,6 +6,8 @@ const rmemeRouter = new SwaggerRouter({ prefix: "/rmeme" });
 // Gets a completely random meme
 rmemeRouter.get("/", RmemeService.getRandomMeme);
 
+rmemeRouter.get("/total", RmemeService.getTotalMemes);
+
 rmemeRouter.swagger({ title: "rmeme", version: "2.0.0" });
 rmemeRouter.mapDir(__dirname);
 
