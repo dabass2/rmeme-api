@@ -57,11 +57,15 @@ export class MemeService {
     if (IS_VIDEO) memeFmt = "video";
     if (IS_GIF) memeFmt = "gif";
 
+    const filename = crypto.randomUUID();
+
     const fileResponse = await fetch(url);
     const buff = Buffer.from(await fileResponse.arrayBuffer());
-    await writeFile(`${process.env.FILE_STORE_BASE_PATH}_tmp.${memeFmt}`, buff);
+    await writeFile(
+      `${process.env.FILE_STORE_BASE_PATH}/${filename}.${memeFmt}`,
+      buff
+    );
 
-    const filename = crypto.randomUUID();
     const newMeme = {
       filename: filename,
       extension: fileExt,
