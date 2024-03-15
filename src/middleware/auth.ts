@@ -22,8 +22,11 @@ export async function auth(ctx: Context, next: Next) {
     user.lastAccessed.getMonth() === currTime.getMonth() &&
     user.lastAccessed.getFullYear() === currTime.getFullYear();
 
-  console.log(sameDay, underApiLimit);
-  ctx.assert(underApiLimit && sameDay, 429);
+  if (!underApiLimit && sameDay) {
+    ctx.status = 429;
+    ctx.message = "Daily request limit reached";
+    return;
+  }
 
   ctx.append("user", JSON.stringify(response?.at(0) ?? {}));
 

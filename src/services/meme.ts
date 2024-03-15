@@ -62,7 +62,7 @@ export class MemeService {
     const fileResponse = await fetch(url);
     const buff = Buffer.from(await fileResponse.arrayBuffer());
     await writeFile(
-      `${process.env.FILE_STORE_BASE_PATH}/${filename}.${memeFmt}`,
+      `${process.env.FILE_STORE_BASE_PATH}/${filename}.${fileExt}`,
       buff
     );
 
