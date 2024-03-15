@@ -11,6 +11,7 @@ import { db } from "..";
 import { memes } from "../db/schema/memes";
 import { eq, sql } from "drizzle-orm";
 import { writeFile } from "fs/promises";
+import { randomUUID } from "crypto";
 
 @responsesAll({
   200: { description: "success" },
@@ -57,7 +58,7 @@ export class MemeService {
     if (IS_VIDEO) memeFmt = "video";
     if (IS_GIF) memeFmt = "gif";
 
-    const filename = crypto.randomUUID();
+    const filename = randomUUID();
 
     const fileResponse = await fetch(url);
     const buff = Buffer.from(await fileResponse.arrayBuffer());
