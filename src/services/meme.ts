@@ -28,11 +28,11 @@ export class MemeService {
     const body = ctx.request.body as { url: string };
     const url = body.url;
 
-    const PICTURE_EXTENSIONS = ["png", "jpg", "jpeg", "apng"];
+    const PICTURE_EXTENSIONS = ["png", "jpg", "jpeg", "apng", "webp"];
     const VIDEO_EXTENSIONS = ["mp4", "webm"];
     const GIF_EXTENSIONS = ["gif"];
 
-    const fileExt = url.split(".").at(-1)?.trim();
+    const fileExt = url.split(".").pop()?.split("?")[0].trim();
 
     if (!fileExt) {
       ctx.status = 400;
