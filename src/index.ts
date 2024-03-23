@@ -11,32 +11,30 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const connection = mysql.createConnection({
+export const connection = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USERNAME,
   database: process.env.DB_TABLE,
   password: process.env.DB_PASSWORD,
 });
 
-export let db: MySql2Database;
-connection.then((con) => {
-  db = drizzle(con);
+// export let db: MySql2Database;
+export const db = drizzle(connection);
 
-  const app = new Kao();
+const app = new Kao();
 
-  app.use(cors());
+app.use(cors());
 
-  app.use(bodyParser());
+app.use(bodyParser());
 
-  app.use(healthRouter.routes()).use(healthRouter.allowedMethods());
+app.use(healthRouter.routes()).use(healthRouter.allowedMethods());
 
-  app.use(rmemeRouter.routes()).use(rmemeRouter.allowedMethods());
+app.use(rmemeRouter.routes()).use(rmemeRouter.allowedMethods());
 
-  app.use(auth);
+app.use(auth);
 
-  app.use(memeRouter.routes()).use(memeRouter.allowedMethods());
+app.use(memeRouter.routes()).use(memeRouter.allowedMethods());
 
-  app.listen("9000", () => {
-    console.log(`Server running on port 9000`);
-  });
+app.listen("9000", () => {
+  console.log(`Server running on port 9000`);
 });

@@ -30,7 +30,7 @@ export class MemeService {
     const url = body.url;
 
     const PICTURE_EXTENSIONS = ["png", "jpg", "jpeg", "apng", "webp"];
-    const VIDEO_EXTENSIONS = ["mp4", "webm"];
+    const VIDEO_EXTENSIONS = ["mp4", "webm", "mov"];
     const GIF_EXTENSIONS = ["gif"];
 
     const fileExt = url.split(".").pop()?.split("?")[0].trim();
@@ -133,6 +133,13 @@ export class MemeService {
       type: "number",
       required: "true",
       description: "ID of the meme to update",
+    },
+  })
+  @body({
+    votes: {
+      type: "number",
+      required: "true",
+      description: "The votes to apply to the meme",
     },
   })
   static async updateMemeById(ctx: Context) {
