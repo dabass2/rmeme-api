@@ -199,6 +199,6 @@ export class MemeService {
     }
 
     ctx.status = 200;
-    ctx.body = { meme: `Deleted meme with id: ${meme_id}` };
+    ctx.body = { message: `Deleted meme with id: ${meme_id}` };
   }
 }
