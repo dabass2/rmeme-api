@@ -1,3 +1,4 @@
+import { memes } from "./../db/schema/memes";
 import {
   Context,
   body,
@@ -8,8 +9,7 @@ import {
   tagsAll,
 } from "koa-swagger-decorator";
 import { db } from "..";
-import { memes } from "../db/schema/memes";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { writeFile } from "fs/promises";
 import { randomUUID } from "crypto";
 
@@ -100,7 +100,23 @@ export class MemeService {
     },
   })
   static async getMemeById(ctx: Context) {
-    const meme_id = Number(ctx.params.id);
+    let meme_id = Number(ctx.params.id);
+
+    if (meme_id < 0) {
+      const max_query = await db
+        .select({ max_id: memes.meme_id })
+        .from(memes)
+        .orderBy(desc(memes.meme_id))
+        .limit(1);
+
+      const { max_id } = max_query[0];
+      console.log(max_id);
+      if (max_id != undefined) {
+        meme_id = max_id + meme_id;
+      } else {
+        throw new Error("Failed getting max query");
+      }
+    }
 
     const response = await db
       .select()

@@ -5,7 +5,7 @@ import { memeRouter } from "./routers/meme";
 import { healthRouter } from "./routers/health";
 import { rmemeRouter } from "./routers/rmeme";
 import mysql from "mysql2/promise";
-import { MySql2Database, drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/mysql2";
 import { auth } from "./middleware/auth";
 import dotenv from "dotenv";
 
@@ -18,8 +18,9 @@ export const connection = mysql.createPool({
   password: process.env.DB_PASSWORD,
 });
 
-// export let db: MySql2Database;
-export const db = drizzle(connection);
+export const db = drizzle(connection, {
+  logger: process.env.NODE_ENV !== "production",
+});
 
 const app = new Kao();
 

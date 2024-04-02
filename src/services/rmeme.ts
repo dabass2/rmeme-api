@@ -6,8 +6,9 @@ import {
   tagsAll,
 } from "koa-swagger-decorator";
 import { db } from "..";
-import { count, sql } from "drizzle-orm";
+import { count, eq, sql } from "drizzle-orm";
 import { memes } from "../db/schema/memes";
+import { meme_tags } from "../db/schema/meme_tags";
 
 @responsesAll({
   200: { description: "success" },
@@ -21,7 +22,16 @@ export class RmemeService {
   static async getRandomMeme(ctx: Context) {
     // tHIs isNT pERfoRMAnT
     const result = await db
-      .select()
+      .select({
+        meme_id: memes.meme_id,
+        filename: memes.filename,
+        extension: memes.extension,
+        format: memes.format,
+        score: memes.score,
+        tags: sql<string | null>`(select GROUP_CONCAT(${
+          meme_tags.tag
+        }) from ${meme_tags} where ${eq(meme_tags.meme_id, memes.meme_id)})`,
+      })
       .from(memes)
       .orderBy(sql`RAND()`)
       .limit(1);
