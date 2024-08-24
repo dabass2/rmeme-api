@@ -16,11 +16,11 @@ export async function auth(ctx: Context, next: Next) {
 
   const user = response[0];
   const currTime = new Date();
-  const underApiLimit = user.accesses < user.dailyLimit;
   const sameDay =
     user.lastAccessed.getDay() === currTime.getDay() &&
     user.lastAccessed.getMonth() === currTime.getMonth() &&
     user.lastAccessed.getFullYear() === currTime.getFullYear();
+  const underApiLimit = sameDay ? user.accesses < user.dailyLimit : true;
 
   if (!underApiLimit && sameDay) {
     ctx.status = 429;
@@ -35,7 +35,7 @@ export async function auth(ctx: Context, next: Next) {
   await db
     .update(users)
     .set({
-      accesses: sql`${users.accesses} + 1`,
+      accesses: sql`${sameDay ? users.accesses : 0} + 1`,
       lastAccessed: new Date(),
     })
     .where(eq(users.apiKey, passedInKey));
