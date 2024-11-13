@@ -1,15 +1,15 @@
-import Kao from "koa";
 import cors from "@koa/cors";
-import bodyParser from "koa-bodyparser";
-import { memeRouter } from "./routers/meme";
-import { healthRouter } from "./routers/health";
-import { rmemeRouter } from "./routers/rmeme";
-import mysql from "mysql2/promise";
-import { drizzle } from "drizzle-orm/mysql2";
-import { auth } from "./middleware/auth";
 import dotenv from "dotenv";
+import { drizzle } from "drizzle-orm/mysql2";
+import Kao from "koa";
+import bodyParser from "koa-bodyparser";
+import mysql from "mysql2/promise";
+import { auth } from "./middleware/auth";
+import { healthRouter } from "./routers/health";
+import { memeRouter } from "./routers/meme";
+import { rmemeRouter } from "./routers/rmeme";
 
-dotenv.config();
+dotenv.config({ path: [".env.rmeme"] });
 
 export const connection = mysql.createPool({
   host: process.env.DB_HOST,
