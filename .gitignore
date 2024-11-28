@@ -5,3 +5,4 @@ images
 temp.js
 *.env
 dist
+old*/
