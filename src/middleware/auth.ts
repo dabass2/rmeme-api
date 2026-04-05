@@ -1,7 +1,7 @@
+import { eq, sql } from "drizzle-orm";
 import { Context, Next } from "koa";
 import { db } from "..";
 import { users } from "../db/schema/users";
-import { eq, sql } from "drizzle-orm";
 
 export async function auth(ctx: Context, next: Next) {
   if (ctx.originalUrl === "/meme/swagger-html") await next();
@@ -16,10 +16,11 @@ export async function auth(ctx: Context, next: Next) {
 
   const user = response[0];
   const currTime = new Date();
+  const lastAccessed = new Date(user.lastAccessed);
   const sameDay =
-    user.lastAccessed.getDay() === currTime.getDay() &&
-    user.lastAccessed.getMonth() === currTime.getMonth() &&
-    user.lastAccessed.getFullYear() === currTime.getFullYear();
+    lastAccessed.getDay() === currTime.getDay() &&
+    lastAccessed.getMonth() === currTime.getMonth() &&
+    lastAccessed.getFullYear() === currTime.getFullYear();
   const underApiLimit = sameDay ? user.accesses < user.dailyLimit : true;
 
   if (!underApiLimit && sameDay) {
@@ -36,7 +37,7 @@ export async function auth(ctx: Context, next: Next) {
     .update(users)
     .set({
       accesses: sql`${sameDay ? users.accesses : 0} + 1`,
-      lastAccessed: new Date(),
+      lastAccessed: new Date().toISOString(),
     })
     .where(eq(users.apiKey, passedInKey));
 

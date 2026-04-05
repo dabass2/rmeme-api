@@ -1,11 +1,15 @@
-import { int, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { users } from "./users";
 
-export const memes = mysqlTable("memes", {
-  meme_id: int("meme_id").primaryKey().notNull().autoincrement(),
-  filename: varchar("filename", { length: 255 }).notNull(),
-  extension: varchar("extension", { length: 255 }).notNull(),
-  format: varchar("format", { length: 255 }).notNull(),
-  uploadedBy: int("uploadedBy").references(() => users.user_id),
-  score: int("score").notNull().default(0),
+export const memes = sqliteTable("memes", {
+  meme_id: integer("meme_id", { mode: "number" })
+    .primaryKey({ autoIncrement: true })
+    .notNull(),
+  filename: text("filename").notNull(),
+  extension: text("extension").notNull(),
+  format: text("format").notNull(),
+  uploadedBy: integer("uploadedBy", { mode: "number" }).references(
+    () => users.user_id,
+  ),
+  score: integer("score", { mode: "number" }).notNull().default(0),
 });

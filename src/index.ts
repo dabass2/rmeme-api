@@ -1,9 +1,9 @@
 import cors from "@koa/cors";
+import { createClient } from "@libsql/client";
 import dotenv from "dotenv";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/libsql";
 import Kao from "koa";
 import bodyParser from "koa-bodyparser";
-import mysql from "mysql2/promise";
 import { auth } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { memeRouter } from "./routers/meme";
@@ -11,16 +11,8 @@ import { rmemeRouter } from "./routers/rmeme";
 
 dotenv.config({ path: [".env.rmeme"] });
 
-export const connection = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USERNAME,
-  database: process.env.DB_TABLE,
-  password: process.env.DB_PASSWORD,
-});
-
-export const db = drizzle(connection, {
-  logger: process.env.NODE_ENV !== "production",
-});
+const client = createClient({ url: "file:./rmeme.db" });
+export const db = drizzle(client);
 
 const app = new Kao();
 

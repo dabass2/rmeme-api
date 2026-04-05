@@ -1,3 +1,4 @@
+import { count, eq, sql } from "drizzle-orm";
 import {
   Context,
   request,
@@ -6,9 +7,8 @@ import {
   tagsAll,
 } from "koa-swagger-decorator";
 import { db } from "..";
-import { count, eq, sql } from "drizzle-orm";
-import { memes } from "../db/schema/memes";
 import { meme_tags } from "../db/schema/meme_tags";
+import { memes } from "../db/schema/memes";
 
 @responsesAll({
   200: { description: "success" },
@@ -33,7 +33,7 @@ export class RmemeService {
         }) from ${meme_tags} where ${eq(meme_tags.meme_id, memes.meme_id)})`,
       })
       .from(memes)
-      .orderBy(sql`RAND()`)
+      .orderBy(sql`RANDOM()`)
       .limit(1);
 
     if (!result || !result[0]) {

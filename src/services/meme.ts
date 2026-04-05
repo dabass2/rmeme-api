@@ -1,4 +1,6 @@
-import { memes } from "./../db/schema/memes";
+import { randomUUID } from "crypto";
+import { desc, eq, sql } from "drizzle-orm";
+import { writeFile } from "fs/promises";
 import {
   Context,
   body,
@@ -9,9 +11,7 @@ import {
   tagsAll,
 } from "koa-swagger-decorator";
 import { db } from "..";
-import { desc, eq, sql } from "drizzle-orm";
-import { writeFile } from "fs/promises";
-import { randomUUID } from "crypto";
+import { memes } from "./../db/schema/memes";
 
 @responsesAll({
   200: { description: "success" },
@@ -64,7 +64,7 @@ export class MemeService {
     const buff = Buffer.from(await fileResponse.arrayBuffer());
     await writeFile(
       `${process.env.FILE_STORE_BASE_PATH}/${filename}.${fileExt}`,
-      buff
+      buff,
     );
 
     const newMeme = {
@@ -76,7 +76,7 @@ export class MemeService {
     } as typeof memes.$inferInsert;
     const response = await db.insert(memes).values(newMeme);
 
-    if (!response || !response[0]) {
+    if (!response || !response.rowsAffected) {
       ctx.status = 500;
       ctx.body = { message: "Error when uploading meme" };
       return;
@@ -85,7 +85,7 @@ export class MemeService {
     ctx.status = 200;
     ctx.body = {
       url: `${process.env.HOSTED_FILE_BASE_PATH}/${filename}.${fileExt}`,
-      meme_id: response[0].insertId,
+      meme_id: response.lastInsertRowid,
       ...newMeme,
     };
   }
@@ -168,7 +168,7 @@ export class MemeService {
       .set({ score: sql`${memes.score} + ${votes}` })
       .where(eq(memes.meme_id, meme_id));
 
-    if (!response || !response[0].affectedRows) {
+    if (!response || !response.rowsAffected) {
       ctx.status = 500;
       ctx.body = { message: "Failed to update score of meme" };
       return;
@@ -179,7 +179,7 @@ export class MemeService {
       .from(memes)
       .where(eq(memes.meme_id, meme_id));
 
-    if (!response || !response[0]) {
+    if (!response || !response.rowsAffected) {
       ctx.status = 500;
       ctx.body = { message: "Failed to get updated row" };
       return;
@@ -208,7 +208,7 @@ export class MemeService {
 
     const response = await db.delete(memes).where(eq(memes.meme_id, meme_id));
 
-    if (!response || !response[0]) {
+    if (!response || !response.rowsAffected) {
       ctx.status = 500;
       ctx.body = { message: `Failed to delete meme with id: ${meme_id}` };
       return;

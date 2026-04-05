@@ -3,5 +3,6 @@ images.json
 images
 *.py
 temp.js
-*.env
+*.env*
 dist
+*.db
