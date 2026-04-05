@@ -33,13 +33,20 @@ export async function auth(ctx: Context, next: Next) {
 
   await next();
 
+  const currDate = new Date().toISOString();
   await db
     .update(users)
     .set({
       accesses: sql`${sameDay ? users.accesses : 0} + 1`,
-      lastAccessed: new Date().toISOString(),
+      lastAccessed: currDate,
     })
     .where(eq(users.apiKey, passedInKey));
+
+  console.log(
+    `User ${user.user_id} has made a request. Total accesses today: ${
+      sameDay ? user.accesses + 1 : 1
+    }/${user.dailyLimit}`,
+  );
 
   ctx.remove("user");
   ctx.append("x-rate-limit", String(user.dailyLimit - (user.accesses + 1)));

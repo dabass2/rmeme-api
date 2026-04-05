@@ -85,7 +85,7 @@ export class MemeService {
     ctx.status = 200;
     ctx.body = {
       url: `${process.env.HOSTED_FILE_BASE_PATH}/${filename}.${fileExt}`,
-      meme_id: response.lastInsertRowid,
+      meme_id: Number(response.lastInsertRowid),
       ...newMeme,
     };
   }
@@ -160,8 +160,20 @@ export class MemeService {
   })
   static async updateMemeById(ctx: Context) {
     const meme_id = Number(ctx.params.id);
-    const reqBody = ctx.request.body as { votes: number };
+    const reqBody = ctx.request.body as { votes: number | undefined };
     const votes = reqBody.votes;
+
+    if (!meme_id) {
+      ctx.status = 400;
+      ctx.body = { message: "Meme ID must be a number" };
+      return;
+    }
+
+    if (votes == undefined) {
+      ctx.status = 400;
+      ctx.body = { message: "Votes must be provided" };
+      return;
+    }
 
     const response = await db
       .update(memes)
